@@ -25,7 +25,6 @@ pygame.init()
 go = True  # how the program knows when to go or quit
 speed = 60  # how fast to update the board
 points = 0
-fired = False
 
 TILE_WIDTH = 24
 TILE_HEIGHT = 24
@@ -38,11 +37,11 @@ num_columns = 15
 num_rows = 20
 
 # make bullet
-game_bullet = bullet.Bullet
-game_bullet.getPos(game_bullet, num_columns, num_rows)  # position the bullet relative to the size of the screen
+game_bullet = bullet.Bullet()
+game_bullet.getPos(num_columns, num_rows)  # position the bullet relative to the size of the screen
 
 # make target
-game_target = target.Target
+game_target = target.Target()
 
 # WINDOW
 screen_width = TILE_WIDTH * num_columns
@@ -72,13 +71,14 @@ for i in range(num_rows):
 
 # DRAW BOARD
 def draw():
+    screen.fill((0, 0, 0, 255))  # fill screen with black
+
     # # TEST RECTANGLE
     for y, array in enumerate(board):
         for x, symbol in enumerate(array):
             pygame.draw.rect(screen, (128, 0, 64, 28), (x * w, y * h, w, h), 1)
 
     # TESTING
-    # screen.fill((0, 0, 255))  # fill screen with blue
 
     # draw turret
     # draw bullet
@@ -89,18 +89,18 @@ def draw():
     pygame.draw.rect(screen, game_target.color, (
         game_target.x * TILE_WIDTH, game_target.y * TILE_WIDTH, TILE_WIDTH * num_columns, 2 * TILE_HEIGHT))
 
-    print("target")
     # flip
     pygame.display.flip()
 
 
 # reset function
 def reset():
-    b = list(game_bullet.bull[0])
-    b[1] = game_bullet.init_y  # reset the bullets position
-    # game_bullet.color = (0, 0, 0, 255)  # make bullet invisible
-    game_target.current_life_span = game_target.initial_life_span  # reset targets lifespan
 
+    game_bullet.y = game_bullet.init_y  # reset bullets position
+    game_bullet.color = (0, 0, 0, 255)  # make bullet invisible
+    game_bullet.fired = False
+
+    game_target.current_life_span = game_target.initial_life_span  # reset targets lifespan
     # change the targets color (make sure it doesn't use the same color twice in a row)
     prev_color = game_target.color
     game_target.color = color_dict[choice(list(color_dict.keys()))]  # choose a random color for the target
@@ -112,7 +112,7 @@ def reset():
 def decrement_life():
     if game_target.current_life_span <= 0:
         reset()
-        print("darn")
+        print("Too slow!!")
     else:
         game_target.current_life_span -= 1
 
@@ -123,7 +123,6 @@ def decrement_life():
 while go:
     # UPDATE THE BOARD
     draw()
-    print("drawing")
     decrement_life()
     print(game_target.current_life_span)
     # HANDLE KEY PRESSES
@@ -132,17 +131,18 @@ while go:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
                 quit()
-            elif event.key in color_dict and not fired:
+            elif event.key in color_dict and not game_bullet.fired:
                 game_bullet.color = color_dict[event.key]
-                fired = True
+                game_bullet.fired = True
 
     # HANDLE FOR WHEN THE BULLET IS FIRED AND WHEN IT HITS
-    if fired:
+    if game_bullet.fired:
         print("fired")  # so I know the code has been reached
 
         # MOVE THE BULLET
+        game_bullet.move()
+        print("moving")
         shell = list(game_bullet.bull[0])
-        shell[1] -= 1
 
         targ = list(game_target.tar[0])
 
@@ -153,12 +153,11 @@ while go:
                 print("yay")  # for debugging purposes so I know the code is reached
             else:
                 points -= 1  # increase points
-                fired = False
+                game_bullet.fired = False
                 print("dang")  # for debugging purposes so I know the code has been reached
 
             reset()
 
-    #  WAIT
-    print("waiting")  # for debugging purposes
+    # WAIT
     game_timer = pygame.time
     game_timer.wait(int(speed))
