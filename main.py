@@ -41,6 +41,17 @@ color_dict = {
     pygame.K_b: (23, 23, 236),  # blue
 
 }
+# TODO figure out how to set up these dictionaries. Might have to do it after setting up the functions
+mode_dict = {
+    "predictive": predictive_game_loop,
+    "reactive": reactive_game_loop,
+}
+display_dict = {
+    "home": draw_home,
+    "options": draw_options,
+    "level": draw_level,
+    "game": draw_game,
+}
 
 # INSTANTIATIONS ///////////////////////////////////////////////
 game_bullet = bullet.Bullet()  # make bullet
@@ -100,6 +111,18 @@ def display_box(message, position):
 
 
 # DISPLAYS /////////////////////////////////////////////////
+def draw_home():
+    pass
+
+
+def draw_options():
+    pass
+
+
+def draw_level():
+    pass
+
+
 def draw_game():
     screen.fill((0, 0, 0, 255))  # fill screen with black
     for y, array in enumerate(board):  # draw grid
@@ -118,7 +141,8 @@ def draw_game():
 
 
 # MODE LOOPS //////////////////////////////////////////////
-
+# SHOULD I DO FUNCTIONS WITH WHILE LOOPS CALLED USING A DICTIONARY?
+# OR JUST SOME WHILE LOOPS THAT ONLY ACTIVATE WHEN A VARIABLE = TRUE?
 
 # MAIN LOOP //////////////////////////////////////////////
 while go:
