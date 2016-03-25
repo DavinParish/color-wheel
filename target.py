@@ -6,7 +6,7 @@ class Target:
     color = (0, 0, 255)  # (0, 0, 0, 255)
     x = 0
     y = 0
-    initial_life_span = 20
-    current_life_span = 20
+    initial_life_span = 55
+    current_life_span = 55
 
-    tar = [(x, y), ]
+

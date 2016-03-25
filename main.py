@@ -4,6 +4,7 @@ from random import choice
 
 import bullet
 import target
+from button import PygButton
 import turret
 
 import pygame
@@ -19,83 +20,51 @@ pygame.font.init()
 pygame.mixer.init()
 pygame.init()
 
-# !!!Initial setup!!!
+# /////////////////////////////////////////////////////////////////////////////////// #
 
-# MAIN FILE VARIABLES
+
+# VARIABLES //////////////////////////////////////////////////////
 go = True  # how the program knows when to go or quit
-speed = 60  # how fast to update the board
-points = 0
-
+speed = 10  # how fast to update the board
 TILE_WIDTH = 24
 TILE_HEIGHT = 24
 w = 24
 h = 24
-
 # number of columns
 num_columns = 15
 # number of rows
 num_rows = 20
 
-# make bullet
-game_bullet = bullet.Bullet()
-game_bullet.getPos(num_columns, num_rows)  # position the bullet relative to the size of the screen
-
-# make target
-game_target = target.Target()
-
-# WINDOW
-screen_width = TILE_WIDTH * num_columns
-screen_height = TILE_HEIGHT * num_rows
-screen = pygame.display.set_mode([screen_width, screen_height])
-
-# COLORS: DICTIONARY
+# DICTIONARIES //////////////////////////////////////////////////
 color_dict = {
     pygame.K_r: (215, 23, 23),  # red
     pygame.K_b: (23, 23, 236),  # blue
 
 }
 
-# BOARD
+# INSTANTIATIONS ///////////////////////////////////////////////
+game_bullet = bullet.Bullet()  # make bullet
+game_bullet.getPos(num_columns, num_rows)  # position the bullet relative to the size of the screen
+game_target = target.Target()  # make target
+
+# WINDOW SETUP ////////////////////////////////////////////////
+screen_width = TILE_WIDTH * num_columns
+screen_height = TILE_HEIGHT * num_rows
+screen = pygame.display.set_mode([screen_width, screen_height])
+
+# BUILD BOARD ////////////////////////////////////////////////
 board = []
 row = []
-
-# make the right number of columns
-for i in range(num_columns):
+for i in range(num_columns):  # make the right number of columns
     row.append('0')
-# make the right number of rows of those columns
-for i in range(num_rows):
+for i in range(num_rows):  # make the right number of rows of those columns
     board.append(row)
 
 
-# !!!Functions!!!
-
-# DRAW BOARD
-def draw():
-    screen.fill((0, 0, 0, 255))  # fill screen with black
-
-    # # TEST RECTANGLE
-    for y, array in enumerate(board):
-        for x, symbol in enumerate(array):
-            pygame.draw.rect(screen, (128, 0, 64, 28), (x * w, y * h, w, h), 1)
-
-    # TESTING
-
-    # draw turret
-    # draw bullet
-    pygame.draw.rect(screen, game_bullet.color,
-                     (game_bullet.x * TILE_WIDTH, game_bullet.y * TILE_WIDTH, TILE_WIDTH, TILE_HEIGHT))
-
-    # draw target
-    pygame.draw.rect(screen, game_target.color, (
-        game_target.x * TILE_WIDTH, game_target.y * TILE_WIDTH, TILE_WIDTH * num_columns, 2 * TILE_HEIGHT))
-
-    # flip
-    pygame.display.flip()
-
+# GENERAL FUNCTIONS /////////////////////////////////////////
 
 # reset function
 def reset():
-
     game_bullet.y = game_bullet.init_y  # reset bullets position
     game_bullet.color = (0, 0, 0, 255)  # make bullet invisible
     game_bullet.fired = False
@@ -112,17 +81,49 @@ def reset():
 def decrement_life():
     if game_target.current_life_span <= 0:
         reset()
+        game_bullet.points -= 1  # increase game_bullet.points
         print("Too slow!!")
     else:
         game_target.current_life_span -= 1
 
 
-# !!!Game!!!
+# display text
+def display_box(message, position):
+    font_object = pygame.font.SysFont('Times New Roman', 18)
+    if message:
+        text = font_object.render(message, 1, (255, 0, 0, 255))
 
-# MAIN GAME LOOP
+        screen.blit(text, position)
+
+
+# POP UPS //////////////////////////////////////////////////
+
+
+# DISPLAYS /////////////////////////////////////////////////
+def draw_game():
+    screen.fill((0, 0, 0, 255))  # fill screen with black
+    for y, array in enumerate(board):  # draw grid
+        for x, symbol in enumerate(array):
+            pygame.draw.rect(screen, (128, 0, 64, 28), (x * w, y * h, w, h), 1)
+    # draw turret
+    # draw bullet
+    pygame.draw.rect(screen, game_bullet.color,
+                     (game_bullet.x * TILE_WIDTH, game_bullet.y * TILE_WIDTH, TILE_WIDTH, TILE_HEIGHT))
+    # draw target
+    pygame.draw.rect(screen, game_target.color, (
+        game_target.x * TILE_WIDTH, game_target.y * TILE_WIDTH, TILE_WIDTH * num_columns, 2 * TILE_HEIGHT))
+
+    display_box("Score: " + str(game_bullet.points), (0, 0))  # show score
+    pygame.display.flip()  # flip
+
+
+# MODE LOOPS //////////////////////////////////////////////
+
+
+# MAIN LOOP //////////////////////////////////////////////
 while go:
     # UPDATE THE BOARD
-    draw()
+    draw_game()
     decrement_life()
     print(game_target.current_life_span)
     # HANDLE KEY PRESSES
@@ -142,22 +143,21 @@ while go:
         # MOVE THE BULLET
         game_bullet.move()
         print("moving")
-        shell = list(game_bullet.bull[0])
-
-        targ = list(game_target.tar[0])
 
         # check for collision with target
-        if shell[1] == targ[1]:
+        if game_bullet.y == game_target.y:
+            print("BLAARGHH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11")
             if game_bullet.color == game_target.color:
-                points += 1  # increase points
+                game_bullet.points += 1  # increase game_bullet.points
                 print("yay")  # for debugging purposes so I know the code is reached
             else:
-                points -= 1  # increase points
+                game_bullet.points -= 1  # increase game_bullet.points
                 game_bullet.fired = False
                 print("dang")  # for debugging purposes so I know the code has been reached
 
             reset()
-
+    print("USER SCORE:")
+    print(game_bullet.points)
     # WAIT
     game_timer = pygame.time
     game_timer.wait(int(speed))

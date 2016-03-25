@@ -9,13 +9,14 @@ class Bullet:
     x = 1
     y = 1
     fired = False
+    points = 0
 
     def getPos(self, num_columns, num_rows):
         self.x = num_columns / 2
         self.y = num_rows - 5
         self.init_x = num_columns / 2
         self.init_y = num_rows - 5
-    bull = [(x, y), ]
+
 
     def move(self):
         self.y -= 1
